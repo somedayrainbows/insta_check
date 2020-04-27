@@ -7,12 +7,12 @@ def applescript(script)
   Open3.capture3 "osascript", *["-l", "AppleScript", :stdin_data => script]
 end
 
-# this lives in network tab -> store -> headers -> cookie, select everything before first semi-colon and _uetsid
-cookie = "put_your_cookie_here"
-
+# script will not work unless you customize the three following values:
+cookie = "put_your_cookie_here" # log in and go to the network tab -> store -> headers -> cookie, select everything before first semi-colon and _uetsid
 retailer = "costco" # or other retailer available in your area
+reseller = "put the very specific reseller name here" # you know what to put here
 
-uri = URI.parse("https://www.instacart.com/v3/containers/#{retailer}/next_gen/retailer_information/content/delivery?source=web")
+uri = URI.parse("https://www.#{reseller}.com/v3/containers/#{retailer}/next_gen/retailer_information/content/delivery?source=web")
 request = Net::HTTP::Get.new(uri)
 request.content_type = "application/json"
 request["Accept"] = "application/json"
@@ -37,8 +37,8 @@ loop do
         # `tell app "Finder" to display dialog "#{err_message}"`
         if !err_message.include?("errors_no_availability")
           p applescript <<-END
-            say "COSTCO SLOT MIGHT BE AVAILABLE!"
-            display dialog "Costco appears to have an opening"
+            say "#{retailer} SLOT MIGHT BE AVAILABLE!"
+            display dialog "#{retailer} appears to have a delivery opening"
           END
         end
 
@@ -46,7 +46,7 @@ loop do
         sleep 10
       else
         p res.code
-        p "Instacart request failed with a #{res.code}; trying again."
+        p "Your #{reseller} request failed with a #{res.code}; trying again."
       end
     end
   end
